@@ -2,7 +2,7 @@
 
 A full-stack Kanban board application inspired by Trello, built with **React** and **Node.js/Express**. Features drag-and-drop task management, rich card details, real-time collaboration tools, and a polished dark-themed UI with glassmorphic design elements.
 
-![Board View](https://img.shields.io/badge/status-active-brightgreen) ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react) ![Express](https://img.shields.io/badge/Express-5-000000?logo=express) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql) ![Netlify](https://img.shields.io/badge/Netlify-deployed-00C7B7?logo=netlify) ![AWS](https://img.shields.io/badge/AWS_EC2-deployed-FF9900?logo=amazonaws)
+![Board View](https://img.shields.io/badge/status-active-brightgreen) ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react) ![Express](https://img.shields.io/badge/Express-5-000000?logo=express) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql) ![Netlify](https://img.shields.io/badge/Netlify-deployed-00C7B7?logo=netlify) ![Render](https://img.shields.io/badge/Render-deployed-46E3B7?logo=render)
 
 > 🌐 **Live Demo**: [https://trello-clone-aman.netlify.app](https://trello-clone-aman.netlify.app)
 
@@ -59,7 +59,7 @@ A full-stack Kanban board application inspired by Trello, built with **React** a
 | **Backend**  | Node.js, Express 5, pg (node-postgres)                                  |
 | **Database** | PostgreSQL (NeonDB-hosted)                                              |
 | **Styling**  | Vanilla CSS with CSS custom properties                                  |
-| **Hosting**  | Netlify (frontend) · AWS EC2 (backend, Nginx + PM2 + HTTPS)             |
+| **Hosting**  | Netlify (frontend) · Render (backend)                                   |
 
 ---
 

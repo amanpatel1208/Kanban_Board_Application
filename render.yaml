@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: todoist-api
+    name: trello-clone-api
     runtime: node
     region: singapore
     rootDir: backend
