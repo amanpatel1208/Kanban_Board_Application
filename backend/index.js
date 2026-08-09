@@ -5,7 +5,7 @@ require('dotenv').config();
 const app = express();
 
 // CORS — allow frontend origin in production, everything in dev
-const devOrigins = ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176', 'http://localhost:5177', 'http://localhost:5178', 'http://localhost:5179', 'http://localhost:5180', 'http://localhost:3000', 'http://localhost:5100'];
+const devOrigins = ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176', 'http://localhost:5177', 'http://localhost:5178', 'http://localhost:5179', 'http://localhost:5180', 'http://localhost:3000', 'http://localhost:5100','https://kanban-style-management.netlify.app'];
 const allowedOrigins = process.env.FRONTEND_URL
   ? [...process.env.FRONTEND_URL.split(',').map(s => s.trim()), ...devOrigins]
   : devOrigins;
