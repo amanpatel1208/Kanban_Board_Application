@@ -4,7 +4,7 @@ A full-stack Kanban board application inspired by Trello, built with **React** a
 
 ![Board View](https://img.shields.io/badge/status-active-brightgreen) ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react) ![Express](https://img.shields.io/badge/Express-5-000000?logo=express) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql) ![Netlify](https://img.shields.io/badge/Netlify-deployed-00C7B7?logo=netlify) ![Render](https://img.shields.io/badge/Render-deployed-46E3B7?logo=render)
 
-> 🌐 **Live Demo**: [https://trello-clone-aman.netlify.app](https://trello-clone-aman.netlify.app)
+> 🌐 **Live Demo**: <https://kanban-style-management.netlify.app>
 
 ---
 
