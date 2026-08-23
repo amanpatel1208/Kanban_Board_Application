@@ -1,4 +1,4 @@
-# 📋 Trello Clone — Full-Stack Kanban Board
+# 📋 KnabanX — Full-Stack Kanban Board
 
 A full-stack Kanban board application inspired by Trello, built with **React** and **Node.js/Express**. Features drag-and-drop task management, rich card details, real-time collaboration tools, and a polished dark-themed UI with glassmorphic design elements.
 
@@ -66,7 +66,7 @@ A full-stack Kanban board application inspired by Trello, built with **React** a
 ## 📁 Project Structure
 
 ```
-trello-clone/
+knabanx/
 ├── .gitignore
 ├── render.yaml                   # Render Blueprint (one-click deploy)
 ├── package.json                  # Root scripts (dev:all, install:all)
@@ -131,8 +131,8 @@ trello-clone/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/trello-clone.git
-cd trello-clone
+git clone https://github.com/your-username/knabanx.git
+cd knabanx
 ```
 
 ### 2. Install dependencies
@@ -210,168 +210,5 @@ The backend runs on an **AWS EC2 t3.micro** instance with Nginx as a reverse pro
    pm2 save && pm2 startup
    ```
 
-5. **Configure Nginx** as a reverse proxy (port 80/443 → localhost:5001)
-6. **Set up SSL** with Certbot + DuckDNS for free HTTPS
-
 ---
 
-### Frontend → Netlify
-
-1. Go to [Netlify](https://app.netlify.com) → **Add new site** → **Import an existing project**
-2. Connect your GitHub repo
-3. Configure build settings:
-
-   | Setting              | Value            |
-   | -------------------- | ---------------- |
-   | **Base directory**   | `frontend`       |
-   | **Build command**    | `npm run build`  |
-   | **Publish directory**| `frontend/dist`  |
-
-4. Add the environment variable:
-
-   | Variable        | Value                                              |
-   | --------------- | -------------------------------------------------- |
-   | `VITE_API_URL`  | Your EC2 backend URL (e.g. `https://your-domain.duckdns.org`) |
-
-   > ⚠️ **Important**: Do NOT include a trailing slash or `/api` — the app appends `/api` automatically.
-
-5. Click **Deploy site**
-
----
-
-### Post-Deployment Checklist
-
-- [ ] Backend health check: visit `https://your-backend-domain/health` — should return `{"status":"ok"}`
-- [ ] Update `FRONTEND_URL` on EC2 `.env` with your actual Netlify URL
-- [ ] Update `VITE_API_URL` on Netlify with your actual EC2/domain URL
-- [ ] Test the live app: create a board, add cards, drag & drop
-
----
-
-## 🔌 API Reference
-
-All endpoints are prefixed with `/api`. Base URL in production: `https://your-backend-domain/api`
-
-### Boards
-
-| Method   | Endpoint                    | Description               |
-| -------- | --------------------------- | ------------------------- |
-| `GET`    | `/boards`                   | List all boards           |
-| `POST`   | `/boards`                   | Create a board            |
-| `GET`    | `/boards/:id`               | Get board with lists/cards|
-| `PATCH`  | `/boards/:id`               | Update board              |
-| `DELETE` | `/boards/:id`               | Delete board              |
-| `POST`   | `/boards/:id/toggle-star`   | Toggle star on board      |
-| `GET`    | `/boards/:id/activity`      | Get board activity log    |
-
-### Lists
-
-| Method   | Endpoint                    | Description               |
-| -------- | --------------------------- | ------------------------- |
-| `POST`   | `/boards/:id/lists`         | Create a list             |
-| `PATCH`  | `/lists/:id`                | Update list               |
-| `PATCH`  | `/lists/:id/reorder`        | Reorder list position     |
-| `DELETE` | `/lists/:id`                | Delete list               |
-
-### Cards
-
-| Method   | Endpoint                            | Description                    |
-| -------- | ----------------------------------- | ------------------------------ |
-| `POST`   | `/lists/:id/cards`                  | Create a card                  |
-| `GET`    | `/cards/search?q=`                  | Search cards globally          |
-| `GET`    | `/cards/:id`                        | Get card with full details     |
-| `PATCH`  | `/cards/:id`                        | Update card                    |
-| `PATCH`  | `/cards/:id/move`                   | Move card to new list/position |
-| `DELETE` | `/cards/:id`                        | Delete card                    |
-| `POST`   | `/cards/:id/labels`                 | Add label to card              |
-| `DELETE` | `/cards/:id/labels/:labelId`        | Remove label from card         |
-| `POST`   | `/cards/:id/members`                | Add member to card             |
-| `DELETE` | `/cards/:id/members/:memberId`      | Remove member from card        |
-| `POST`   | `/cards/:id/checklist-items`        | Add checklist item             |
-| `PATCH`  | `/checklist-items/:id`              | Toggle/update checklist item   |
-| `DELETE` | `/checklist-items/:id`              | Delete checklist item          |
-| `POST`   | `/cards/:id/attachments`            | Add attachment                 |
-| `DELETE` | `/cards/:id/attachments/:attachId`  | Delete attachment              |
-| `POST`   | `/cards/:id/comments`               | Add comment                    |
-| `DELETE` | `/cards/:id/comments/:commentId`    | Delete comment                 |
-
-### Labels & Members
-
-| Method   | Endpoint       | Description          |
-| -------- | -------------- | -------------------- |
-| `GET`    | `/labels`      | List all labels      |
-| `POST`   | `/labels`      | Create a label       |
-| `GET`    | `/members`     | List all members     |
-| `POST`   | `/members`     | Create a member      |
-
-### Health Check
-
-| Method | Endpoint   | Description          |
-| ------ | ---------- | -------------------- |
-| `GET`  | `/health`  | Returns `{"status":"ok"}` |
-
----
-
-## 🗄️ Database Schema
-
-```
-boards ──┬── lists ──── cards ──┬── card_labels ──── labels
-         │                     ├── card_members ─── members
-         │                     ├── checklist_items
-         │                     ├── attachments
-         │                     ├── comments ──────── members
-         │                     └── activity_logs ─── members
-         └── members (board owner)
-```
-
----
-
-## 🛠️ Available Scripts
-
-### Root
-
-| Script          | Command                | Description                         |
-| --------------- | ---------------------- | ----------------------------------- |
-| `dev:all`       | `npm run dev:all`      | Start backend + frontend together   |
-| `install:all`   | `npm run install:all`  | Install deps for both packages      |
-
-### Backend (`/backend`)
-
-| Script   | Command          | Description                     |
-| -------- | ---------------- | ------------------------------- |
-| `start`  | `npm start`      | Start server with Node          |
-| `dev`    | `npm run dev`    | Start server with Nodemon (HMR) |
-
-### Frontend (`/frontend`)
-
-| Script    | Command            | Description               |
-| --------- | ------------------ | ------------------------- |
-| `dev`     | `npm run dev`      | Start Vite dev server     |
-| `build`   | `npm run build`    | Production build          |
-| `preview` | `npm run preview`  | Preview production build  |
-| `lint`    | `npm run lint`     | Run ESLint                |
-
----
-
-## 🔧 Environment Variables
-
-### Backend (AWS EC2)
-
-| Variable       | Required | Description                                        |
-| -------------- | -------- | -------------------------------------------------- |
-| `DATABASE_URL` | ✅       | PostgreSQL connection string (with `?sslmode=require`) |
-| `PORT`         | ❌       | Server port (default: `5001`)                       |
-| `NODE_ENV`     | ❌       | Set to `production` (enables SSL for DB)            |
-| `FRONTEND_URL` | ✅       | Netlify URL for CORS (comma-separated for multiple) |
-
-### Frontend (Netlify)
-
-| Variable       | Required | Description                                        |
-| -------------- | -------- | -------------------------------------------------- |
-| `VITE_API_URL` | ✅       | EC2 backend URL (e.g. `https://your-domain.duckdns.org`) |
-
----
-
-## 📄 License
-
-This project is licensed under the ISC License.

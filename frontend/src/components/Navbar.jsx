@@ -91,7 +91,7 @@ export default function Navbar({ boardTitle, onTogglePlanner, onToggleSidebar })
             <rect x="5" y="5" width="6" height="11" rx="1" fill="#fff"/>
             <rect x="13" y="5" width="6" height="7" rx="1" fill="#fff"/>
           </svg>
-          <span className="logo-text">Trello Clone</span>
+          <span className="logo-text">KnabanX</span>
         </Link>
       </div>
 
@@ -132,7 +132,9 @@ export default function Navbar({ boardTitle, onTogglePlanner, onToggleSidebar })
                             <span className="search-result-list">in {card.list_title}</span>
                             {card.due_date && (
                               <span className={`search-result-due${isOverdue(card.due_date) ? ' overdue' : ''}`}>
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4 }}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
+                                  <circle cx="12" cy="12" r="9" />
+                                </svg>
                                 {new Date(card.due_date).toLocaleDateString()}
                                 {isOverdue(card.due_date) && ' · Overdue'}
                               </span>

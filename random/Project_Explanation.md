@@ -8,7 +8,7 @@ Here is how it works:
 * We compiled our React/Vite frontend into pure static assets (`index.html`, `CSS`, and pure `JavaScript`).
 * We uploaded these files into an S3 Bucket and enabled the **Static Website Hosting** property.
 * We attached a **Bucket Policy** (`s3:GetObject`) that allows public read access to those files.
-* When a user visits the S3 Endpoint URL, the S3 bucket acts exactly like a lightweight Web Server. It immediately serves the `index.html` file to the user's browser without needing any backend compute instances (like an EC2 Linux server). 
+* When a user visits the S3 Endpoint URL, the S3 bucket acts exactly like a lightweight Web Server. It immediately serves the `index.html` file to the user's browser without needing any backend compute instances (like an EC2 Linux server).
 * The browser downloads the files and executes the React application locally.
 
 **Why this is good:** It costs almost `$0.00` since there is no server running 24/7, and AWS guarantees 99.99% uptime because S3 data is automatically duplicated across multiple Availability Zones.
