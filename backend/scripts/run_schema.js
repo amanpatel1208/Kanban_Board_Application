@@ -14,14 +14,24 @@ const pool = new Pool({
 
 const run = async () => {
   const schemaPath = path.join(__dirname, '..', 'src', 'db', 'schema.sql');
-  const sql = fs.readFileSync(schemaPath, 'utf8');
-  
+  const extrasPath = path.join(__dirname, '..', 'src', 'db', 'seed_extras.sql');
+  const massivePath = path.join(__dirname, '..', 'src', 'db', 'massive_seed.sql');
+
   try {
     console.log('Running schema against:', dbUrl.replace(/\/\/.*@/, '//***@'));
-    await pool.query(sql);
-    console.log('✅ Schema + seed data applied successfully!');
+    await pool.query(fs.readFileSync(schemaPath, 'utf8'));
+    console.log('✅ Schema applied successfully!');
+
+    if (fs.existsSync(extrasPath)) {
+      await pool.query(fs.readFileSync(extrasPath, 'utf8'));
+      console.log('✅ Seed extras applied successfully!');
+    }
+    if (fs.existsSync(massivePath)) {
+      await pool.query(fs.readFileSync(massivePath, 'utf8'));
+      console.log('✅ Massive seed applied successfully!');
+    }
   } catch (err) {
-    console.error('❌ Schema failed:', err.message);
+    console.error('❌ Schema/Seed failed:', err.message);
   } finally {
     await pool.end();
   }

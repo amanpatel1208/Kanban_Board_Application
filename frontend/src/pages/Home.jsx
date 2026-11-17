@@ -13,7 +13,7 @@ export default function Home() {
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { currentMember } = useMember();
+  const {currentMember } = useMember();
   const [view, setView] = useState('boards_global');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
