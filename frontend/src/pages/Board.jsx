@@ -40,7 +40,7 @@ export default function Board() {
   const [plannerOpen, setPlannerOpen] = useState(false);
   const [boardsOpen, setBoardsOpen] = useState(false);
   const [showMemberActivity, setShowMemberActivity] = useState(false);
-  const [archiveStack, setArchiveStack] = useState([]); // For Undo
+  const [undoStack, setUndoStack] = useState([]); // For Undo (archive + move + list archive)
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const fetchBoardData = useCallback(() => {
@@ -142,12 +142,21 @@ export default function Board() {
       const oldIdx = listCards.findIndex(c => c.id === activeIdNum);
       const newIdx = overType === 'list' ? listCards.length - 1 : listCards.findIndex(c => c.id === overIdNum);
 
+      // Capture card snapshot for undo before the move
+      const cardSnapshot = listCards.find(c => c.id === activeIdNum) || Object.values(cards).flat().find(c => c.id === activeIdNum);
+      const originalListId = cardSnapshot?.list_id || actListId;
+      const originalPosition = cardSnapshot?.position;
+
       if (oldIdx !== -1 && newIdx !== -1 && oldIdx !== newIdx) {
         const reordered = arrayMove(listCards, oldIdx, newIdx);
         setCards(prev => ({ ...prev, [overListId]: reordered }));
         moveCard(activeIdNum, { newListId: overListId, newPosition: Math.max(0, newIdx) + 1, performed_by: currentMember?.id });
+        // Push undo entry for the move
+        setUndoStack(prev => [...prev, { type: 'move_card', cardId: activeIdNum, fromListId: originalListId, fromPosition: originalPosition, cardSnapshot }]);
       } else if (oldIdx !== -1 || activeContainer !== overContainer) {
         moveCard(activeIdNum, { newListId: overListId, newPosition: Math.max(0, newIdx) + 1, performed_by: currentMember?.id });
+        // Push undo entry for cross-list move
+        setUndoStack(prev => [...prev, { type: 'move_card', cardId: activeIdNum, fromListId: originalListId, fromPosition: originalPosition, cardSnapshot }]);
       }
     }
   };
@@ -155,19 +164,61 @@ export default function Board() {
   useEffect(() => {
     const handleUndo = async (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
-        if (archiveStack.length === 0) return;
-        const last = archiveStack[archiveStack.length - 1];
-        setArchiveStack(prev => prev.slice(0, -1));
-        const restored = await updateCard(last.id, { archived: false, list_id: last.list_id, position: last.position });
-        handleCardUpdated(restored);
+        if (undoStack.length === 0) return;
+        e.preventDefault();
+        const last = undoStack[undoStack.length - 1];
+        setUndoStack(prev => prev.slice(0, -1));
+
+        if (last.type === 'archive_card') {
+          const restored = await updateCard(last.card.id, { archived: false, list_id: last.card.list_id, position: last.card.position });
+          handleCardUpdated(restored);
+          // Remove from board's archived_cards
+          setBoard(b => b ? { ...b, archived_cards: (b.archived_cards || []).filter(c => c.id !== last.card.id) } : b);
+        } else if (last.type === 'move_card') {
+          // Move card back to original list & position
+          await moveCard(last.cardId, { newListId: last.fromListId, newPosition: last.fromPosition, performed_by: currentMember?.id });
+          setCards(prev => {
+            const next = { ...prev };
+            // Remove from current list
+            Object.keys(next).forEach(lid => { next[lid] = next[lid].filter(c => c.id !== last.cardId); });
+            // Add back to original list
+            const movedCard = last.cardSnapshot;
+            const targetCards = [...(next[last.fromListId] || [])];
+            targetCards.splice(last.fromPosition - 1, 0, { ...movedCard, list_id: last.fromListId });
+            next[last.fromListId] = targetCards;
+            return next;
+          });
+        } else if (last.type === 'archive_list') {
+          await updateList(last.list.id, { archived: false });
+          setLists(ls => [...ls, last.list].sort((a, b) => a.position - b.position));
+          setCards(prev => ({ ...prev, [last.list.id]: last.listCards || [] }));
+          setBoard(b => b ? { ...b, archived_lists: (b.archived_lists || []).filter(l => l.id !== last.list.id) } : b);
+        }
       }
     };
     window.addEventListener('keydown', handleUndo);
     return () => window.removeEventListener('keydown', handleUndo);
-  }, [archiveStack]);
+  }, [undoStack, currentMember]);
 
   const handleCardUpdated = async (updated) => {
     let patchData = updated;
+
+    // If card was just archived, remove it from the board and add to archived_cards
+    if (patchData.archived) {
+      setCards(prev => {
+        const next = { ...prev };
+        Object.keys(next).forEach(lid => { next[lid] = next[lid].filter(c => c.id !== patchData.id); });
+        return next;
+      });
+      setBoard(b => {
+        if (!b) return b;
+        const alreadyInArchive = (b.archived_cards || []).some(c => c.id === patchData.id);
+        if (alreadyInArchive) return b;
+        return { ...b, archived_cards: [...(b.archived_cards || []), patchData] };
+      });
+      return;
+    }
+
     if (updated.is_complete) {
       const doneList = lists.find(l => l.title.toLowerCase() === 'done');
       if (doneList && updated.list_id !== doneList.id) {
@@ -288,9 +339,10 @@ export default function Board() {
                     onCardClick={setSelectedCardId}
                     onCardAdded={(card) => setCards(prev => ({ ...prev, [list.id]: [...(prev[list.id]||[]), card] }))}
                     onCardArchive={async (card) => {
-                      setArchiveStack(prev => [...prev, card]);
+                      setUndoStack(prev => [...prev, { type: 'archive_card', card }]);
                       await updateCard(card.id, { archived: true });
                       setCards(prev => ({ ...prev, [card.list_id]: (prev[card.list_id]||[]).filter(c => c.id !== card.id) }));
+                      setBoard(b => b ? { ...b, archived_cards: [...(b.archived_cards || []), card] } : b);
                     }}
                     onCardToggleComplete={async (card) => {
                       const newComplete = !card.is_complete;
@@ -303,8 +355,12 @@ export default function Board() {
                       handleCardUpdated(updated);
                     }}
                     onListArchived={async () => {
+                      const listCards = cards[list.id] || [];
+                      setUndoStack(prev => [...prev, { type: 'archive_list', list, listCards }]);
                       await updateList(list.id, { archived: true });
                       setLists(ls => ls.filter(l => l.id !== list.id));
+                      setCards(prev => { const next = { ...prev }; delete next[list.id]; return next; });
+                      setBoard(b => b ? { ...b, archived_lists: [...(b.archived_lists || []), list] } : b);
                     }}
                     onListRenamed={(title) => setLists(ls => ls.map(l => l.id === list.id ? { ...l, title } : l))}
                     onListColorChanged={(listId, color) => setLists(ls => ls.map(l => l.id === listId ? { ...l, color } : l))}
